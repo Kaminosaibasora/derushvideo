@@ -16,6 +16,8 @@ class CutVideo:
         self.videopath = videopath
         self.video = VideoFileClip(self.folderin + videopath)
         self.video_player = self.video.ipython_display()
+        self.timein = 0
+        self.timeout = 0
         print("Video chargée")
     
     def playVideo(self):
