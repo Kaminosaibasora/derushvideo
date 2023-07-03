@@ -1,26 +1,44 @@
-from PyQt5.QtCore import QDir, Qt, QUrl
+from PyQt5.QtCore import QDir, Qt, QUrl, QTimer
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
-        QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import QApplication, QFileDialog, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QGridLayout
 from PyQt5.QtWidgets import QWidget, QPushButton
 import sys
-
+import time
 
 class Video_player_widget(QWidget):
     def __init__(self, cutVideo):
         QWidget.__init__(self)
         self.cutVideo = cutVideo
-
-        videoWidget = QVideoWidget()
-
+        self.targetPosition = 0
+        self.activationSearchPosition = ""
+        # lecteur vidéo
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-
+        self.mediaPlayer.setNotifyInterval(1)
+        self.mediaPlayer.positionChanged.connect(self.updatePlayerImage)
+        # widget video
+        self.videoWidget = QVideoWidget()
+        self.mediaPlayer.setVideoOutput(self.videoWidget)
+        # Bouton Play
         self.playButton = QPushButton()
-        self.playButton.setEnabled(False)
         self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
-        self.playButton.clicked.connect(self.play)
+        self.playButton.clicked.connect(self.play_pause)
+        # Bouton Little Past
+        self.littlePastButton = QPushButton("<")
+        self.littlePastButton.clicked.connect(self.littlePastJump)
+        # Bouton Grand Past
+        self.grandPastButton = QPushButton("<<")
+        self.grandPastButton.clicked.connect(self.grandPastJump)
+        # Bouton Little Futur
+        self.littleFuturButton = QPushButton(">")
+        self.littleFuturButton.clicked.connect(self.littleFuturJump)
+        # Bouton Grand Futur
+        self.grandFuturButton = QPushButton(">>")
+        self.grandFuturButton.clicked.connect(self.grandFuturJump)
+        # Label position
+        self.labelPosition = QLabel()
 
+        # Slider
         self.positionSlider = QSlider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(self.setPosition)
@@ -28,49 +46,107 @@ class Video_player_widget(QWidget):
         self.errorLabel = QLabel()
         self.errorLabel.setSizePolicy(QSizePolicy.Preferred,
                 QSizePolicy.Maximum)
-
-        # Create layouts to place inside widget
-        controlLayout = QHBoxLayout()
-        controlLayout.setContentsMargins(0, 0, 0, 0)
-        controlLayout.addWidget(self.playButton)
-        controlLayout.addWidget(self.positionSlider)
-
-        layout = QVBoxLayout()
-        layout.addWidget(videoWidget)
-        layout.addLayout(controlLayout)
-        layout.addWidget(self.errorLabel)
-
-        # Set widget to contain window contents
-        self.setLayout(layout)
-        # self.resize(640, 480)
-        # self.setFixedWidth(600)
-
-        self.mediaPlayer.setVideoOutput(videoWidget)
+        
+        # CONNECT
         self.mediaPlayer.stateChanged.connect(self.mediaStateChanged)
         self.mediaPlayer.positionChanged.connect(self.positionChanged)
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
         self.mediaPlayer.error.connect(self.handleError)
 
-    def openFile(self):
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open Movie",
-                QDir.homePath())
+        # LAYOUT
+        layout = QGridLayout()
+        layout.addWidget(self.videoWidget,      0, 0, 1, 9)
+        layout.addWidget(self.positionSlider,   1, 0, 1, 9)
+        layout.addWidget(self.grandPastButton,  2, 2)
+        layout.addWidget(self.littlePastButton, 2, 3)
+        layout.addWidget(self.playButton,       2, 4)
+        layout.addWidget(self.littleFuturButton,2, 5)
+        layout.addWidget(self.grandFuturButton, 2, 6)
+        layout.addWidget(self.labelPosition,    2, 7)
+        layout.addWidget(self.errorLabel,       2, 0)
+        # layout.addLayout(controlLayout)
 
-        if fileName != '':
-            self.loadMedia(fileName)
+        # Set widget to contain window contents
+        self.setLayout(layout)
+        # self.resize(640, 480)
+        # self.setFixedWidth(600)
     
     def loadMedia(self, fileName):
-        self.mediaPlayer.setMedia(
-                QMediaContent(QUrl.fromLocalFile(fileName)))
-        self.playButton.setEnabled(True)
+        """Charge la vidéo dans le lecteur
 
-    def exitCall(self):
-        sys.exit(app.exec_())
+        Args:
+            fileName (String): chemin complet vers la vidéo.
+        """
+        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(fileName)))
+        # self.playButton.setEnabled(True)
 
-    def play(self):
+    def play_pause(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
+            self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         else:
             self.mediaPlayer.play()
+            self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
+    
+    def grandPastJump(self):
+        print("grand past jump", self.mediaPlayer.position())
+        self.mediaPlayer.pause()
+        newposition = self.mediaPlayer.position()-1000
+        if newposition < 0:
+            newposition = 0
+        # self.targetPosition = newposition
+        # self.mediaPlayer.setPlaybackRate(-1.0)
+        # self.activationSearchPosition = "P"
+        # self.mediaPlayer.play()
+        self.setPosition(newposition)
+        self.updateImagePosition()
+        
+
+    def littlePastJump(self):
+        print("little past jump", self.mediaPlayer.position())
+        self.mediaPlayer.pause()
+        newposition = self.mediaPlayer.position()-100
+        if newposition < 0:
+            newposition = 0
+        # self.targetPosition = newposition
+        # self.mediaPlayer.setPlaybackRate(-0.5)
+        # self.activationSearchPosition = "P"
+        # self.mediaPlayer.play()
+        self.setPosition(newposition)
+        self.updateImagePosition()
+    
+    def grandFuturJump(self):
+        print("grand futur jump", self.mediaPlayer.position())
+        self.mediaPlayer.pause()
+        newposition = self.mediaPlayer.position()+1000
+        if newposition > self.mediaPlayer.duration():
+            newposition = self.mediaPlayer.duration()
+        # self.targetPosition = newposition
+        # self.mediaPlayer.setPlaybackRate(2.0)
+        # self.activationSearchPosition = "F"
+        # self.mediaPlayer.play()
+        self.setPosition(newposition)
+        self.updateImagePosition()
+
+    def littleFuturJump(self):
+        print("little futur jump", self.mediaPlayer.position())
+        self.mediaPlayer.pause()
+        newposition = self.mediaPlayer.position()+100
+        if newposition > self.mediaPlayer.duration():
+            newposition = self.mediaPlayer.duration()
+        # self.targetPosition = newposition
+        # self.mediaPlayer.setPlaybackRate(0.5)
+        # self.activationSearchPosition = "F"
+        # self.mediaPlayer.play()
+        self.setPosition(newposition)
+        self.updateImagePosition()
+    
+    def updateImagePosition(self):
+        self.mediaPlayer.play()
+        # print("play")
+        time.sleep(1/10)
+        self.mediaPlayer.pause()
+        # print("pause")
 
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
@@ -92,6 +168,22 @@ class Video_player_widget(QWidget):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.errorLabel.setText("Error: " + self.mediaPlayer.errorString())
+
+    def updatePlayerImage(self, position):
+        self.labelPosition.setText(f"Position : {position} ms")
+        # if self.activationSearchPosition != "" :
+        #     print("target : ", self.targetPosition)
+        #     if self.activationSearchPosition == "F" and position >= self.targetPosition :
+        #         self.mediaPlayer.pause()
+        #         self.mediaPlayer.setPlaybackRate(1.0)
+        #         self.activationSearchPosition = ""
+        #     elif self.activationSearchPosition == "P" and position <= self.targetPosition :
+        #         self.mediaPlayer.pause()
+        #         self.mediaPlayer.setPlaybackRate(1.0)
+        #         self.activationSearchPosition = ""
+    
+    def exitCall(self):
+        sys.exit(app.exec_())
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

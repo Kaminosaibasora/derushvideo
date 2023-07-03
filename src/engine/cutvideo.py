@@ -54,6 +54,10 @@ class CutVideo:
         if self.video == None :
             print("Error : video None")
             raise ValueError("Aucune vidéo n'a été chargée !")
+    
+    def getFullPathVideo(self):
+        self.verifVideoLoad()
+        return self.folderin + self.videopath
 
 
 if __name__ == '__main__':

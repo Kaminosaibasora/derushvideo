@@ -4,6 +4,8 @@ from PyQt5.QtCore import QDir, Qt, QUrl
 from PyQt5.QtGui import QIcon
 from list_file_widget import List_file_widget
 from video_player_widget import Video_player_widget
+sys.path.append('./engine')
+import filegestion as fg
 
 class GUI(QMainWindow):
     def __init__(self, cutvideo, parent=None):
@@ -33,13 +35,13 @@ class GUI(QMainWindow):
 
         # LAYOUT
         layout = QGridLayout()
-        layout.addWidget(self.listFiles,     0, 0)
-        layout.addWidget(self.videoReader,   0, 1, 1, 3)
-        layout.addWidget(self.inButton,      1, 0)
-        layout.addWidget(self.inLabel,       1, 1)
-        layout.addWidget(self.outButton,     1, 2)
-        layout.addWidget(self.outLabel,      1, 3)
-        layout.addWidget(self.generate,      1, 4)
+        layout.addWidget(self.listFiles,     0, 0, 2, 1)
+        layout.addWidget(self.videoReader,   0, 1, 1, 4)
+        layout.addWidget(self.inButton,      1, 1)
+        layout.addWidget(self.inLabel,       1, 2)
+        layout.addWidget(self.outButton,     1, 3)
+        layout.addWidget(self.outLabel,      1, 4)
+        layout.addWidget(self.generate,      1, 5)
         wid = QWidget(self)
         self.setCentralWidget(wid)
         wid.setLayout(layout)
@@ -47,21 +49,26 @@ class GUI(QMainWindow):
 
     def setIn(self):
         print("IN")
-        self.cutVideo.setTimeIn(0)
+        self.cutVideo.setTimeIn(self.videoReader.mediaPlayer.position()/1000)
         self.inLabel.setText(str(self.cutVideo.timein))
 
     def setOut(self):
         print("OUT")
-        self.cutVideo.setTimeOut(0)
+        self.cutVideo.setTimeOut(self.videoReader.mediaPlayer.position()/1000)
         self.outLabel.setText(str(self.cutVideo.timeout))
 
     def generateCut(self):
         print("Generate")
+        name_clip = fg.generateNewName(self.cutVideo.folderout, self.cutVideo.videopath)
+        print(name_clip)
+        self.cutVideo.cutVideoClip(name_clip)
+
     
     def clickchoosepath(self, line):
         self.listFiles.labelchoose.setText(line.data())
         self.listFiles.linecurrent = line
         self.cutVideo.loadVideo(line.data())
-        # self.video.loadMedia(self.rengine.get_current_path())
-        # self.video.play()
+        # Charger la vidéo dans le lecteur
+        self.videoReader.loadMedia(self.cutVideo.getFullPathVideo())
+        self.videoReader.play_pause()
         print(line.data())
