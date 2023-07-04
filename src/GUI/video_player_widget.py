@@ -69,7 +69,9 @@ class Video_player_widget(QWidget):
         # Set widget to contain window contents
         self.setLayout(layout)
         # self.resize(640, 480)
-        # self.setFixedWidth(600)
+        self.setMinimumWidth(1000)
+        self.setMinimumHeight(500)
+        # self.setFixedWidth(1000)
     
     def loadMedia(self, fileName):
         """Charge la vidéo dans le lecteur
@@ -81,6 +83,7 @@ class Video_player_widget(QWidget):
         # self.playButton.setEnabled(True)
 
     def play_pause(self):
+        self.mediaPlayer.setPlaybackRate(1.0)
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
             self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
@@ -90,63 +93,24 @@ class Video_player_widget(QWidget):
     
     def grandPastJump(self):
         print("grand past jump", self.mediaPlayer.position())
-        self.mediaPlayer.pause()
-        newposition = self.mediaPlayer.position()-1000
-        if newposition < 0:
-            newposition = 0
-        # self.targetPosition = newposition
-        # self.mediaPlayer.setPlaybackRate(-1.0)
-        # self.activationSearchPosition = "P"
-        # self.mediaPlayer.play()
-        self.setPosition(newposition)
-        self.updateImagePosition()
+        self.mediaPlayer.setPlaybackRate(-1.0)
+        self.mediaPlayer.play()
         
 
     def littlePastJump(self):
         print("little past jump", self.mediaPlayer.position())
-        self.mediaPlayer.pause()
-        newposition = self.mediaPlayer.position()-100
-        if newposition < 0:
-            newposition = 0
-        # self.targetPosition = newposition
-        # self.mediaPlayer.setPlaybackRate(-0.5)
-        # self.activationSearchPosition = "P"
-        # self.mediaPlayer.play()
-        self.setPosition(newposition)
-        self.updateImagePosition()
+        self.mediaPlayer.setPlaybackRate(-0.5)
+        self.mediaPlayer.play()
     
     def grandFuturJump(self):
         print("grand futur jump", self.mediaPlayer.position())
-        self.mediaPlayer.pause()
-        newposition = self.mediaPlayer.position()+1000
-        if newposition > self.mediaPlayer.duration():
-            newposition = self.mediaPlayer.duration()
-        # self.targetPosition = newposition
-        # self.mediaPlayer.setPlaybackRate(2.0)
-        # self.activationSearchPosition = "F"
-        # self.mediaPlayer.play()
-        self.setPosition(newposition)
-        self.updateImagePosition()
+        self.mediaPlayer.setPlaybackRate(2.0)
+        self.mediaPlayer.play()
 
     def littleFuturJump(self):
         print("little futur jump", self.mediaPlayer.position())
-        self.mediaPlayer.pause()
-        newposition = self.mediaPlayer.position()+100
-        if newposition > self.mediaPlayer.duration():
-            newposition = self.mediaPlayer.duration()
-        # self.targetPosition = newposition
-        # self.mediaPlayer.setPlaybackRate(0.5)
-        # self.activationSearchPosition = "F"
-        # self.mediaPlayer.play()
-        self.setPosition(newposition)
-        self.updateImagePosition()
-    
-    def updateImagePosition(self):
+        self.mediaPlayer.setPlaybackRate(0.5)
         self.mediaPlayer.play()
-        # print("play")
-        time.sleep(1/10)
-        self.mediaPlayer.pause()
-        # print("pause")
 
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
@@ -171,16 +135,6 @@ class Video_player_widget(QWidget):
 
     def updatePlayerImage(self, position):
         self.labelPosition.setText(f"Position : {position} ms")
-        # if self.activationSearchPosition != "" :
-        #     print("target : ", self.targetPosition)
-        #     if self.activationSearchPosition == "F" and position >= self.targetPosition :
-        #         self.mediaPlayer.pause()
-        #         self.mediaPlayer.setPlaybackRate(1.0)
-        #         self.activationSearchPosition = ""
-        #     elif self.activationSearchPosition == "P" and position <= self.targetPosition :
-        #         self.mediaPlayer.pause()
-        #         self.mediaPlayer.setPlaybackRate(1.0)
-        #         self.activationSearchPosition = ""
     
     def exitCall(self):
         sys.exit(app.exec_())

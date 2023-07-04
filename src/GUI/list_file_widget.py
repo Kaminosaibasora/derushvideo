@@ -17,10 +17,9 @@ class List_file_widget(QWidget):
         self.choosebuttonout = QPushButton("choose folder out")
         self.choosebuttonout.clicked.connect(self.choosefolderout)
 
-        self.listwidget = QListWidget(self)
-        # self.listwidget.clicked.connect(self.clicklist)
-        self.listpath = []
-        self.filechoose = ""
+        self.listwidget  = QListWidget(self)
+        self.listpath    = []
+        self.filechoose  = ""
         self.linecurrent = None
 
         layout = QVBoxLayout()
@@ -30,7 +29,6 @@ class List_file_widget(QWidget):
         layout.addWidget(self.labelchoose)
 
         self.setLayout(layout)
-        # self.resize(100, 480)
         self.setFixedWidth(200)
         # MAJ de la liste
         self.list_video_folder(self.cutVideo.folderin)
@@ -67,7 +65,7 @@ class List_file_widget(QWidget):
                     valid = True
                 except Exception as e :
                     print(e)
-            self.cutVideo.folderout = folderPath
+            self.cutVideo.folderout = folderPath + "/"
         except Exception as e :
             print(e)
             error = QMessageBox()
@@ -76,6 +74,9 @@ class List_file_widget(QWidget):
             error.setWindowTitle("Erreur de validation")
     
     def maj_list_files(self):
+        """Met à jour les widget de la liste de lien.
+        """
+        self.listwidget.clear()
         for f in self.listpath :
             self.listwidget.addItem(
                 QListWidgetItem(f)
@@ -95,10 +96,11 @@ class List_file_widget(QWidget):
         self.linecurrent = None
     
     def list_video_folder(self, path):
-        self.cutVideo.folderin = path
+        """Met à jour le path du folderin de l'objet cut_video et récupère la liste des fichiers."""
+        self.cutVideo.folderin = path + "/"
         self.listpath = self.list_video(path)
 
-    def list_video(self, path = "./../file_in", types_accepted = ["mp4"]):
+    def list_video(self, path = "./../file_in", types_accepted = ["mp4", "mov", "avi"]):
         if path[-1] == "/" :
             path = path[:-1]
         files = os.listdir(path)

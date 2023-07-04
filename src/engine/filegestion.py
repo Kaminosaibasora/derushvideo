@@ -9,11 +9,13 @@ def generateNewName(folderpath, basename = "video_cut.mp4"):
     for filename in getListFileOut(folderpath) :
         filename = filename.split('.')[0]
         temp_id = filename.split('_')[-1]
-        try :
-            if int(temp_id) >= id :
-                id = int(temp_id)+1
-        except Exception as e :
-            print("error ", e, " : ", temp_id)
+        print(filename, "==", name)
+        if name in filename :
+            try :
+                if int(temp_id) >= id :
+                    id = int(temp_id)+1
+            except Exception as e :
+                print("error ", e, " : ", temp_id)
     return name + '_' + str(id) + ".mp4"
 
 if __name__ == '__main__':

@@ -8,29 +8,29 @@ class CutVideo:
         self.folderout = "../file_out/"
         self.videopath = ""
         self.video = None
-        self.videoplayer = None
+        # self.videoplayer = None
         self.timein = 0
         self.timeout = 0
     
     def loadVideo(self, videopath = "videotest.mp4"):
         self.videopath = videopath
         self.video = VideoFileClip(self.folderin + videopath)
-        self.video_player = self.video.ipython_display()
+        # self.video_player = self.video.ipython_display()
         self.timein = 0
         self.timeout = 0
         print("Video chargée")
     
-    def playVideo(self):
-        self.verifVideoLoad()
-        self.video_player.play()
+    # def playVideo(self):
+    #     self.verifVideoLoad()
+    #     self.video_player.play()
     
-    def pauseVideo(self):
-        self.verifVideoLoad()
-        self.video_player.pause()
+    # def pauseVideo(self):
+    #     self.verifVideoLoad()
+    #     self.video_player.pause()
     
-    def closeVideo(self):
-        self.verifVideoLoad()
-        self.video_player.close()
+    # def closeVideo(self):
+    #     self.verifVideoLoad()
+    #     self.video_player.close()
     
     def previewVideo(self):
         self.verifVideoLoad()
